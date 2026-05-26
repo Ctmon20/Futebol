@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analise Pro | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #071B2A 0%, #0A263C 100%);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(16, 59, 85, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="text-white p-6">
+
+    <div id="app" class="max-w-5xl mx-auto">
+        <div id="menu-screen" class="flex flex-col items-center justify-center py-20 animate-in fade-in duration-700">
+            <div class="mb-12 text-center">
+                <h1 class="text-5xl font-extrabold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">ANALISE PRO</h1>
+                <p class="text-blue-200 opacity-80">Selecione um módulo para iniciar sua análise</p>
+            </div>
+            
+            <div id="menu" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+                </div>
+        </div>
+
+        <div id="data-screen" class="hidden animate-in zoom-in duration-300">
+            <div class="flex items-center justify-between mb-8">
+                <button onclick="voltar()" class="flex items-center gap-2 bg-[#103B55] hover:bg-[#1a5a80] px-6 py-2 rounded-full transition-all border border-blue-500/30">
+                    <span>←</span> Voltar
+                </button>
+                <div class="text-right">
+                    <h2 id="nome-modulo" class="text-2xl font-bold"></h2>
+                    <p id="contador" class="text-green-400 text-sm font-mono">Atualizando em: 300s</p>
+                </div>
+            </div>
+
+            <div class="glass p-6 rounded-3xl shadow-2xl overflow-x-auto">
+                <div id="tabela-container"></div>
+            </div>
+
+            <div id="banner" class="hidden mt-8 p-6 bg-white/5 rounded-2xl border border-dashed border-white/20 text-center">
+                <p class="text-gray-400 text-sm">ESPAÇO PUBLICITÁRIO</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MODULOS = {
+            "Tabela Série A": "1391365116",
+            "Tabela Série B": "109280208",
+            "Tabela Série C": "794662485",
+            "Jogos do dia": "1702201024",
+            "Análise": "2135486228"
+        };
+
+        const URL_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOmXcfQXxPCTcaMeqUqMH95gAylWlYPTrFvVoild6xdnFN242cJizsi-p9T8Gko7iM00bT7zGDbkz/pub?gid={gid}&single=true&output=csv";
+        let intervalId = null;
+
+        const menuEl = document.getElementById('menu');
+        Object.keys(MODULOS).forEach(nome => {
+            const btn = document.createElement('div');
+            btn.className = "glass p-8 rounded-3xl cursor-pointer hover:bg-white/10 transition-all hover:-translate-y-1 hover:border-green-500/50 text-center font-semibold text-lg";
+            btn.innerText = nome;
+            btn.onclick = () => carregarModulo(nome, MODULOS[nome]);
+            menuEl.appendChild(btn);
+        });
+
+        function carregarModulo(nome, gid) {
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('data-screen').classList.remove('hidden');
+            document.getElementById('nome-modulo').innerText = nome;
+            buscarDados(gid);
+            if(intervalId) clearInterval(intervalId);
+            iniciarCronometro(gid);
+        }
+
+        async function buscarDados(gid) {
+            const url = URL_BASE.replace('{gid}', gid) + "&nocache=" + new Date().getTime();
+            const container = document.getElementById('tabela-container');
+            container.innerHTML = '<div class="py-10 text-center text-blue-400">Carregando dados...</div>';
+            
+            const response = await fetch(url);
+            const data = await response.text();
+            Papa.parse(data, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    container.innerHTML = "";
+                    const table = document.createElement('table');
+                    table.className = "w-full text-sm border-separate border-spacing-0";
+                    
+                    // Cabeçalho
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `<tr class="bg-blue-950/50">${Object.keys(results.data[0]).map(h => `<th class="p-4 text-left text-green-400 border-b border-white/10">${h}</th>`).join('')}</tr>`;
+                    table.appendChild(thead);
+
+                    // Linhas
+                    const tbody = document.createElement('tbody');
+                    results.data.forEach((row, i) => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-white/5 transition-colors";
+                        tr.innerHTML = Object.values(row).map(v => `<td class="p-4 border-b border-white/5">${v}</td>`).join('');
+                        tbody.appendChild(tr);
+                    });
+                    table.appendChild(tbody);
+                    container.appendChild(table);
+                    document.getElementById('banner').classList.remove('hidden');
+                }
+            });
+        }
+
+        function iniciarCronometro(gid) {
+            let seg = 300;
+            intervalId = setInterval(() => {
+                seg--;
+                document.getElementById('contador').innerText = `Atualizando em: ${seg}s`;
+                if(seg <= 0) { seg = 300; buscarDados(gid); }
+            }, 1000);
+        }
+
+        function voltar() {
+            clearInterval(intervalId);
+            document.getElementById('data-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+            document.getElementById('banner').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
