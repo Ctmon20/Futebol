@@ -18,6 +18,17 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+            /* Novo: Ajuste fino para os botões */
+        .btn-modulo {
+            width: 100%;
+            max-width: 300px; /* Limita o tamanho máximo */
+            padding: 1.25rem;
+            font-size: 1rem;  /* Reduzido para não quebrar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="text-white p-6">
@@ -38,9 +49,11 @@
                 <button onclick="voltar()" class="flex items-center gap-2 bg-[#103B55] hover:bg-[#1a5a80] px-6 py-2 rounded-full transition-all border border-blue-500/30">
                     <span>←</span> Voltar
                 </button>
-                <div class="text-right">
-                    <h2 id="nome-modulo" class="text-2xl font-bold"></h2>
-                    <p id="contador" class="text-green-400 text-sm font-mono">Atualizando em: 300s</p>
+                <div class="flex flex-col items-center justify-center mb-8 text-center">
+                    <h2 id="nome-modulo" class="text-2xl font-bold mb-1"></h2>
+                    <p id="contador" class="text-green-400 text-sm font-mono bg-blue-950/30 px-3 py-1 rounded-full">
+                        Atualizando em: 300s
+                    </p>
                 </div>
             </div>
 
@@ -69,7 +82,8 @@
         const menuEl = document.getElementById('menu');
         Object.keys(MODULOS).forEach(nome => {
             const btn = document.createElement('div');
-            btn.className = "glass p-8 rounded-3xl cursor-pointer hover:bg-white/10 transition-all hover:-translate-y-1 hover:border-green-500/50 text-center font-semibold text-lg";
+            // Adicionamos a classe btn-modulo aqui
+            btn.className = "btn-modulo glass rounded-2xl cursor-pointer hover:bg-white/10 transition-all hover:border-green-500/50 font-semibold";
             btn.innerText = nome;
             btn.onclick = () => carregarModulo(nome, MODULOS[nome]);
             menuEl.appendChild(btn);
