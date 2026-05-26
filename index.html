@@ -6,36 +6,15 @@
     <title>Analise Pro | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="//static.surfe.pro/js/net.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: linear-gradient(135deg, #071B2A 0%, #0A263C 100%);
-            min-height: 100vh;
-        }
-        .glass {
-            background: rgba(16, 59, 85, 0.4);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        /* Ajustes para Mobile */
-        .btn-modulo {
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 0.85rem; /* Fonte menor nos módulos */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-        /* Ajuste da Tabela */
-        table { font-size: 0.7rem; } /* Fonte menor na tabela */
-        th, td { padding: 6px !important; } /* Padding reduzido */
-        /* Contador centralizado */
-        #contador {
-            display: inline-block;
-            margin: 0 auto;
-        }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #071B2A 0%, #0A263C 100%); min-height: 100vh; }
+        .glass { background: rgba(16, 59, 85, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-modulo { width: 100%; padding: 12px 16px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; text-align: center; }
+        table { font-size: 0.7rem; }
+        th, td { padding: 6px !important; }
+        #contador { display: inline-block; margin: 0 auto; }
     </style>
 </head>
 <body class="text-white p-4">
@@ -46,21 +25,15 @@
                 <h1 class="text-4xl font-extrabold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">ANALISE PRO</h1>
                 <p class="text-blue-200 opacity-80 text-sm">Selecione um módulo</p>
             </div>
-            
-            <div id="menu" class="grid grid-cols-1 gap-4 w-full max-w-sm">
-                </div>
+            <div id="menu" class="grid grid-cols-1 gap-4 w-full max-w-sm"></div>
         </div>
 
         <div id="data-screen" class="hidden animate-in zoom-in duration-300">
             <div class="flex flex-col mb-6">
-                <button onclick="voltar()" class="self-start mb-4 flex items-center gap-2 bg-[#103B55] hover:bg-[#1a5a80] px-4 py-1.5 rounded-full text-sm transition-all border border-blue-500/30">
-                    ← Voltar
-                </button>
+                <button onclick="voltar()" class="self-start mb-4 flex items-center gap-2 bg-[#103B55] hover:bg-[#1a5a80] px-4 py-1.5 rounded-full text-sm transition-all border border-blue-500/30">← Voltar</button>
                 <div class="text-center">
                     <h2 id="nome-modulo" class="text-xl font-bold mb-1"></h2>
-                    <p id="contador" class="text-green-400 text-xs font-mono bg-blue-950/30 px-3 py-1 rounded-full">
-                        Atualizando em: 300s
-                    </p>
+                    <p id="contador" class="text-green-400 text-xs font-mono bg-blue-950/30 px-3 py-1 rounded-full">Atualizando em: 300s</p>
                 </div>
             </div>
 
@@ -68,8 +41,10 @@
                 <div id="tabela-container"></div>
             </div>
 
-            <div id="banner" class="hidden mt-6 p-4 bg-white/5 rounded-xl border border-dashed border-white/20 text-center">
-                <p class="text-gray-400 text-xs">ESPAÇO PUBLICITÁRIO</p>
+            <div id="banner" class="hidden mt-6 p-2 bg-white/5 rounded-xl border border-dashed border-white/20 text-center overflow-hidden">
+                <div id="ad-wrapper">
+                    <ins class="surfe-be" data-sid="420519"></ins>
+                </div>
             </div>
         </div>
     </div>
@@ -85,6 +60,7 @@
 
         const URL_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOmXcfQXxPCTcaMeqUqMH95gAylWlYPTrFvVoild6xdnFN242cJizsi-p9T8Gko7iM00bT7zGDbkz/pub?gid={gid}&single=true&output=csv";
         let intervalId = null;
+        let adIntervalId = null;
 
         const menuEl = document.getElementById('menu');
         Object.keys(MODULOS).forEach(nome => {
@@ -95,13 +71,25 @@
             menuEl.appendChild(btn);
         });
 
+        function atualizarBanner() {
+            const wrapper = document.getElementById('ad-wrapper');
+            wrapper.innerHTML = '<ins class="surfe-be" data-sid="420519"></ins>';
+            if (window.adsurfebe) {
+                (adsurfebe = window.adsurfebe || []).push({});
+            }
+        }
+
         function carregarModulo(nome, gid) {
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('data-screen').classList.remove('hidden');
             document.getElementById('nome-modulo').innerText = nome;
             buscarDados(gid);
             if(intervalId) clearInterval(intervalId);
+            if(adIntervalId) clearInterval(adIntervalId);
+            
             iniciarCronometro(gid);
+            atualizarBanner();
+            adIntervalId = setInterval(atualizarBanner, 30000);
         }
 
         async function buscarDados(gid) {
@@ -112,25 +100,13 @@
             const response = await fetch(url);
             const data = await response.text();
             Papa.parse(data, {
-                header: true,
-                skipEmptyLines: true,
+                header: true, skipEmptyLines: true,
                 complete: (results) => {
                     container.innerHTML = "";
                     const table = document.createElement('table');
                     table.className = "w-full text-left border-separate border-spacing-0";
-                    
-                    const thead = document.createElement('thead');
-                    thead.innerHTML = `<tr class="bg-blue-950/50">${Object.keys(results.data[0]).map(h => `<th class="p-2 text-green-400 border-b border-white/10">${h}</th>`).join('')}</tr>`;
-                    table.appendChild(thead);
-
-                    const tbody = document.createElement('tbody');
-                    results.data.forEach((row) => {
-                        const tr = document.createElement('tr');
-                        tr.className = "hover:bg-white/5 transition-colors";
-                        tr.innerHTML = Object.values(row).map(v => `<td class="p-2 border-b border-white/5">${v}</td>`).join('');
-                        tbody.appendChild(tr);
-                    });
-                    table.appendChild(tbody);
+                    table.innerHTML = `<thead><tr class="bg-blue-950/50">${Object.keys(results.data[0]).map(h => `<th class="p-2 text-green-400 border-b border-white/10">${h}</th>`).join('')}</tr></thead>` +
+                                      `<tbody>${results.data.map(row => `<tr class="hover:bg-white/5">${Object.values(row).map(v => `<td class="p-2 border-b border-white/5">${v}</td>`).join('')}</tr>`).join('')}</tbody>`;
                     container.appendChild(table);
                     document.getElementById('banner').classList.remove('hidden');
                 }
@@ -148,6 +124,7 @@
 
         function voltar() {
             clearInterval(intervalId);
+            clearInterval(adIntervalId);
             document.getElementById('data-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.remove('hidden');
             document.getElementById('banner').classList.add('hidden');
