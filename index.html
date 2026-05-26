@@ -15,6 +15,17 @@
         table { font-size: 0.7rem; }
         th, td { padding: 6px !important; }
         #contador { display: inline-block; margin: 0 auto; }
+        
+        /* Efeito de carregamento para o banner */
+        .skeleton {
+            background: linear-gradient(90deg, #103B55 25%, #1a5a80 50%, #103B55 75%);
+            background-size: 200% 100%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 <body class="text-white p-4">
@@ -42,7 +53,7 @@
             </div>
 
             <div id="banner" class="hidden mt-6 p-2 bg-white/5 rounded-xl border border-dashed border-white/20 text-center overflow-hidden">
-                <div id="ad-wrapper">
+                <div id="ad-wrapper" class="skeleton min-h-[100px] flex items-center justify-center rounded-lg">
                     <ins class="surfe-be" data-sid="420519"></ins>
                 </div>
             </div>
@@ -73,10 +84,13 @@
 
         function atualizarBanner() {
             const wrapper = document.getElementById('ad-wrapper');
+            wrapper.classList.add('skeleton'); // Reativa o efeito se necessário
             wrapper.innerHTML = '<ins class="surfe-be" data-sid="420519"></ins>';
             if (window.adsurfebe) {
                 (adsurfebe = window.adsurfebe || []).push({});
             }
+            // Remove o skeleton após 2 segundos caso o anúncio demore
+            setTimeout(() => wrapper.classList.remove('skeleton'), 2000);
         }
 
         function carregarModulo(nome, gid) {
