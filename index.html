@@ -18,51 +18,58 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-            /* Novo: Ajuste fino para os botões */
+        /* Ajustes para Mobile */
         .btn-modulo {
             width: 100%;
-            max-width: 300px; /* Limita o tamanho máximo */
-            padding: 1.25rem;
-            font-size: 1rem;  /* Reduzido para não quebrar */
+            padding: 12px 16px;
+            font-size: 0.85rem; /* Fonte menor nos módulos */
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
         }
+        /* Ajuste da Tabela */
+        table { font-size: 0.7rem; } /* Fonte menor na tabela */
+        th, td { padding: 6px !important; } /* Padding reduzido */
+        /* Contador centralizado */
+        #contador {
+            display: inline-block;
+            margin: 0 auto;
+        }
     </style>
 </head>
-<body class="text-white p-6">
+<body class="text-white p-4">
 
     <div id="app" class="max-w-5xl mx-auto">
-        <div id="menu-screen" class="flex flex-col items-center justify-center py-20 animate-in fade-in duration-700">
-            <div class="mb-12 text-center">
-                <h1 class="text-5xl font-extrabold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">ANALISE PRO</h1>
-                <p class="text-blue-200 opacity-80">Selecione um módulo para iniciar sua análise</p>
+        <div id="menu-screen" class="flex flex-col items-center justify-center py-10 animate-in fade-in duration-700">
+            <div class="mb-8 text-center">
+                <h1 class="text-4xl font-extrabold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">ANALISE PRO</h1>
+                <p class="text-blue-200 opacity-80 text-sm">Selecione um módulo</p>
             </div>
             
-            <div id="menu" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+            <div id="menu" class="grid grid-cols-1 gap-4 w-full max-w-sm">
                 </div>
         </div>
 
         <div id="data-screen" class="hidden animate-in zoom-in duration-300">
-            <div class="flex items-center justify-between mb-8">
-                <button onclick="voltar()" class="flex items-center gap-2 bg-[#103B55] hover:bg-[#1a5a80] px-6 py-2 rounded-full transition-all border border-blue-500/30">
-                    <span>←</span> Voltar
+            <div class="flex flex-col mb-6">
+                <button onclick="voltar()" class="self-start mb-4 flex items-center gap-2 bg-[#103B55] hover:bg-[#1a5a80] px-4 py-1.5 rounded-full text-sm transition-all border border-blue-500/30">
+                    ← Voltar
                 </button>
-                <div class="flex flex-col items-center justify-center mb-8 text-center">
-                    <h2 id="nome-modulo" class="text-2xl font-bold mb-1"></h2>
-                    <p id="contador" class="text-green-400 text-sm font-mono bg-blue-950/30 px-3 py-1 rounded-full">
+                <div class="text-center">
+                    <h2 id="nome-modulo" class="text-xl font-bold mb-1"></h2>
+                    <p id="contador" class="text-green-400 text-xs font-mono bg-blue-950/30 px-3 py-1 rounded-full">
                         Atualizando em: 300s
                     </p>
                 </div>
             </div>
 
-            <div class="glass p-6 rounded-3xl shadow-2xl overflow-x-auto">
+            <div class="glass p-3 rounded-2xl shadow-2xl overflow-x-auto">
                 <div id="tabela-container"></div>
             </div>
 
-            <div id="banner" class="hidden mt-8 p-6 bg-white/5 rounded-2xl border border-dashed border-white/20 text-center">
-                <p class="text-gray-400 text-sm">ESPAÇO PUBLICITÁRIO</p>
+            <div id="banner" class="hidden mt-6 p-4 bg-white/5 rounded-xl border border-dashed border-white/20 text-center">
+                <p class="text-gray-400 text-xs">ESPAÇO PUBLICITÁRIO</p>
             </div>
         </div>
     </div>
@@ -82,7 +89,6 @@
         const menuEl = document.getElementById('menu');
         Object.keys(MODULOS).forEach(nome => {
             const btn = document.createElement('div');
-            // Adicionamos a classe btn-modulo aqui
             btn.className = "btn-modulo glass rounded-2xl cursor-pointer hover:bg-white/10 transition-all hover:border-green-500/50 font-semibold";
             btn.innerText = nome;
             btn.onclick = () => carregarModulo(nome, MODULOS[nome]);
@@ -101,7 +107,7 @@
         async function buscarDados(gid) {
             const url = URL_BASE.replace('{gid}', gid) + "&nocache=" + new Date().getTime();
             const container = document.getElementById('tabela-container');
-            container.innerHTML = '<div class="py-10 text-center text-blue-400">Carregando dados...</div>';
+            container.innerHTML = '<div class="py-10 text-center text-blue-400 text-sm">Carregando dados...</div>';
             
             const response = await fetch(url);
             const data = await response.text();
@@ -111,19 +117,17 @@
                 complete: (results) => {
                     container.innerHTML = "";
                     const table = document.createElement('table');
-                    table.className = "w-full text-sm border-separate border-spacing-0";
+                    table.className = "w-full text-left border-separate border-spacing-0";
                     
-                    // Cabeçalho
                     const thead = document.createElement('thead');
-                    thead.innerHTML = `<tr class="bg-blue-950/50">${Object.keys(results.data[0]).map(h => `<th class="p-4 text-left text-green-400 border-b border-white/10">${h}</th>`).join('')}</tr>`;
+                    thead.innerHTML = `<tr class="bg-blue-950/50">${Object.keys(results.data[0]).map(h => `<th class="p-2 text-green-400 border-b border-white/10">${h}</th>`).join('')}</tr>`;
                     table.appendChild(thead);
 
-                    // Linhas
                     const tbody = document.createElement('tbody');
-                    results.data.forEach((row, i) => {
+                    results.data.forEach((row) => {
                         const tr = document.createElement('tr');
                         tr.className = "hover:bg-white/5 transition-colors";
-                        tr.innerHTML = Object.values(row).map(v => `<td class="p-4 border-b border-white/5">${v}</td>`).join('');
+                        tr.innerHTML = Object.values(row).map(v => `<td class="p-2 border-b border-white/5">${v}</td>`).join('');
                         tbody.appendChild(tr);
                     });
                     table.appendChild(tbody);
