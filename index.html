@@ -44,7 +44,7 @@
                 <button onclick="voltar()" class="self-start mb-4 flex items-center gap-2 bg-[#103B55] hover:bg-[#1a5a80] px-4 py-1.5 rounded-full text-sm transition-all border border-blue-500/30">← Voltar</button>
                 <div class="text-center">
                     <h2 id="nome-modulo" class="text-xl font-bold mb-1"></h2>
-                    <p id="contador" class="text-green-400 text-xs font-mono bg-blue-950/30 px-3 py-1 rounded-full">Atualizando em: 300s</p>
+                    <p id="contador" class="text-green-400 text-xs font-mono bg-blue-950/30 px-3 py-1 rounded-full">Atualizando em: 120s</p>
                 </div>
             </div>
 
@@ -128,7 +128,7 @@
         }
 
         function iniciarCronometro(gid) {
-            let seg = 300;
+            let seg = 120;
             intervalId = setInterval(() => {
                 seg--;
                 document.getElementById('contador').innerText = `Atualizando em: ${seg}s`;
